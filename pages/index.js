@@ -1,39 +1,53 @@
-import Head from 'next/head'
-import Image from 'next/image'
-import styles from '../styles/Home.module.css'
 
-export default function Home() {
-  return (
+// import Image from 'next/image'
+// import styles from '../styles/Home.module.css'
+// import "../node_modules/bootstrap/dist/css/bootstrap.min.css"
+// import { Form,Button,Container,Row,Col} from 'react-bootstrap'
+// import "../compontents/header"
+// import Home from './Home'
 
-    <Container>
-  {/* Stack the columns on mobile by making one full-width and the other half-width */}
-  <Row>
-    <Col xs={12} md={8}>
-      xs=12 md=8
-    </Col>
-    <Col xs={6} md={4}>
-      xs=6 md=4
-    </Col>
-  </Row>
 
-  {/* Columns start at 50% wide on mobile and bump up to 33.3% wide on desktop */}
-  <Row>
-    <Col xs={6} md={4}>
-      xs=6 md=4
-    </Col>
-    <Col xs={6} md={4}>
-      xs=6 md=4
-    </Col>
-    <Col xs={6} md={4}>
-      xs=6 md=4
-    </Col>
-  </Row>
+// export default function index() {
+//   return (
+// <div>
+// <Home/>
+// </div>
+//   )
+// }
 
-  {/* Columns are always 50% wide, on mobile and desktop */}
-  <Row>
-    <Col xs={6}>xs=6</Col>
-    <Col xs={6}>xs=6</Col>
-  </Row>
-</Container>
-  )
+
+import Link from 'next/link'
+import groq from 'groq'
+import client from '../client'
+
+const Index = ({posts}) => {
+    return (
+      <div>
+        <h1>Welcome to a blog!</h1>
+        {posts.length > 0 && posts.map(
+          ({ _id, title = '', slug = '', publishedAt = '' }) =>
+            slug && (
+              <li key={_id}>
+                <Link href="/post/[slug]" as={`/post/${slug.current}`}>
+                  <a>{title}</a>
+                </Link>{' '}
+                ({new Date(publishedAt).toDateString()})
+              </li>
+            )
+        )}
+      </div>
+    )
 }
+
+export async function getStaticProps() {
+    const posts = await client.fetch(groq`
+      *[_type == "post" && publishedAt < now()] | order(publishedAt desc)
+    `)
+    return {
+      props: {
+        posts
+      }
+    }
+}
+
+export default Index
